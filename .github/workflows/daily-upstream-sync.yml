@@ -2,8 +2,8 @@ name: Sync fork with upstream
 
 on:
   schedule:
-    # Daily at 02:17 UTC (10:17 China Standard Time)
-    - cron: "17 2 * * *"
+    # Every hour at minute 17 UTC (also minute 17 in China Standard Time)
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
