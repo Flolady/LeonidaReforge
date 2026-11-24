@@ -24,10 +24,26 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Fast-forward from upstream
+      - name: Check upstream and sync safely
         shell: bash
         run: |
           git remote add upstream https://github.com/LeonidaReforge/Leonida.git
           git fetch upstream main
-          git merge --ff-only upstream/main
+
+          deleted_files="$(git diff --diff-filter=D --name-only HEAD..upstream/main)"
+          if [[ -n "$deleted_files" ]]; then
+            {
+              echo "## Upstream sync stopped: files would be deleted"
+              echo
+              echo "Review these paths before deciding whether to sync:"
+              echo
+              echo '~~~text'
+              printf '%s\n' "$deleted_files"
+              echo '~~~'
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error title=Upstream deletions detected::Sync stopped; review the job summary for the deleted paths."
+            exit 1
+          fi
+
+          git merge --no-edit upstream/main
           git push origin main
